@@ -1,0 +1,95 @@
+name: "Corporate Enterprise"
+policy_type: "corporate"
+description: "Standard corporate network with strict access controls"
+default_deny_inbound: true
+default_deny_outbound: true
+allow_established: true
+allow_icmp: true
+prohibited_ports: [23, 135, 139, 445, 1433, 3389, 5900, 5901]
+restricted_protocols: []
+banned_sources: ["0.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+require_logging: true
+require_stateful: true
+max_rules_warning: 100
+zones:
+  - name: "Management"
+    cidr: "10.10.0.0/24"
+    description: "Network management"
+    zone_type: "admin"
+  - name: "Servers"
+    cidr: "10.10.10.0/24"
+    description: "Application servers"
+    zone_type: "internal"
+  - name: "Databases"
+    cidr: "10.10.20.0/24"
+    description: "Database servers"
+    zone_type: "restricted"
+  - name: "Employee LAN"
+    cidr: "10.10.100.0/22"
+    description: "Employee workstations"
+    zone_type: "internal"
+  - name: "DMZ"
+    cidr: "10.10.200.0/24"
+    description: "Public services"
+    zone_type: "dmz"
+services:
+  - name: "SSH"
+    protocol: "tcp"
+    port: 22
+    allowed_sources: ["10.10.0.0/24"]
+    denied_sources: []
+    allowed_destinations: []
+    denied_destinations: []
+    requires_admin_access: true
+    admin_networks: ["10.10.0.0/24"]
+    description: "Management network only"
+  - name: "HTTPS"
+    protocol: "tcp"
+    port: 443
+    allowed_sources: ["0.0.0.0/0"]
+    denied_sources: []
+    allowed_destinations: ["10.10.200.0/24"]
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "Public web services"
+  - name: "SMTP"
+    protocol: "tcp"
+    port: 25
+    allowed_sources: ["10.10.10.0/24"]
+    denied_sources: []
+    allowed_destinations: ["10.10.200.0/24"]
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "Mail relay only"
+  - name: "DNS"
+    protocol: "udp"
+    port: 53
+    allowed_sources: ["10.10.0.0/16"]
+    denied_sources: []
+    allowed_destinations: []
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "Internal DNS"
+  - name: "LDAP"
+    protocol: "tcp"
+    port: 389
+    allowed_sources: ["10.10.0.0/16"]
+    denied_sources: []
+    allowed_destinations: []
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "Directory services"
+  - name: "HTTPS-Internal"
+    protocol: "tcp"
+    port: 8443
+    allowed_sources: ["10.10.0.0/16"]
+    denied_sources: []
+    allowed_destinations: ["10.10.10.0/24"]
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "Internal admin consoles"

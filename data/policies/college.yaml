@@ -1,0 +1,95 @@
+name: "College/University Network"
+policy_type: "college"
+description: "Typical college network with student, faculty, and admin segments"
+default_deny_inbound: true
+default_deny_outbound: false
+allow_established: true
+allow_icmp: true
+prohibited_ports: [23, 135, 139, 445, 1433, 3389]
+restricted_protocols: []
+banned_sources: ["0.0.0.0/8", "127.0.0.0/8"]
+require_logging: true
+require_stateful: true
+max_rules_warning: 100
+zones:
+  - name: "Admin Network"
+    cidr: "10.0.0.0/24"
+    description: "Administrative staff"
+    zone_type: "admin"
+  - name: "Faculty Network"
+    cidr: "10.0.1.0/24"
+    description: "Faculty members"
+    zone_type: "internal"
+  - name: "Student Network"
+    cidr: "10.0.10.0/23"
+    description: "Student dorms/labs"
+    zone_type: "internal"
+  - name: "Server DMZ"
+    cidr: "10.0.100.0/24"
+    description: "Public-facing servers"
+    zone_type: "dmz"
+  - name: "Guest WiFi"
+    cidr: "10.0.200.0/24"
+    description: "Guest wireless"
+    zone_type: "restricted"
+services:
+  - name: "SSH"
+    protocol: "tcp"
+    port: 22
+    allowed_sources: ["10.0.0.0/24"]
+    denied_sources: []
+    allowed_destinations: []
+    denied_destinations: []
+    requires_admin_access: true
+    admin_networks: ["10.0.0.0/24"]
+    description: "Admin SSH access only"
+  - name: "HTTP"
+    protocol: "tcp"
+    port: 80
+    allowed_sources: ["0.0.0.0/0"]
+    denied_sources: []
+    allowed_destinations: ["10.0.100.0/24"]
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "Web servers in DMZ"
+  - name: "HTTPS"
+    protocol: "tcp"
+    port: 443
+    allowed_sources: ["0.0.0.0/0"]
+    denied_sources: []
+    allowed_destinations: ["10.0.100.0/24"]
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "Secure web servers in DMZ"
+  - name: "DNS"
+    protocol: "udp"
+    port: 53
+    allowed_sources: ["10.0.0.0/16"]
+    denied_sources: []
+    allowed_destinations: []
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "Internal DNS"
+  - name: "DHCP"
+    protocol: "udp"
+    port: 67
+    allowed_sources: ["10.0.10.0/23", "10.0.200.0/24"]
+    denied_sources: []
+    allowed_destinations: []
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "Student and guest DHCP"
+  - name: "NTP"
+    protocol: "udp"
+    port: 123
+    allowed_sources: ["10.0.0.0/16"]
+    denied_sources: []
+    allowed_destinations: []
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "Time synchronization"

@@ -1,0 +1,48 @@
+# Sample iptables rules for testing
+# This file contains various rule patterns including anomalies
+
+# Rule 1: Allow SSH from anywhere (OVERLY PERMISSIVE - should be restricted)
+-A INPUT -p tcp -s 0.0.0.0/0 --dport 22 -j ACCEPT
+
+# Rule 2: Allow HTTP to DMZ (OK)
+-A INPUT -p tcp -s 0.0.0.0/0 -d 10.0.100.0/24 --dport 80 -j ACCEPT
+
+# Rule 3: Allow HTTPS to DMZ (OK)
+-A INPUT -p tcp -s 0.0.0.0/0 -d 10.0.100.0/24 --dport 443 -j ACCEPT
+
+# Rule 4: Allow DNS from internal (OK)
+-A INPUT -p udp -s 10.0.0.0/16 --dport 53 -j ACCEPT
+
+# Rule 5: Allow NTP from internal (OK)
+-A INPUT -p udp -s 10.0.0.0/16 --dport 123 -j ACCEPT
+
+# Rule 6: DUPLICATE of Rule 2 (REDUNDANT)
+-A INPUT -p tcp -s 0.0.0.0/0 -d 10.0.100.0/24 --dport 80 -j ACCEPT
+
+# Rule 7: Allow SSH from admin network (OK - but shadowed by Rule 1)
+-A INPUT -p tcp -s 10.0.0.0/24 --dport 22 -j ACCEPT
+
+# Rule 8: Allow Telnet from anywhere (PROHIBITED PORT + OVERLY PERMISSIVE)
+-A INPUT -p tcp -s 0.0.0.0/0 --dport 23 -j ACCEPT
+
+# Rule 9: Allow RDP from anywhere (OVERLY PERMISSIVE)
+-A INPUT -p tcp -s 0.0.0.0/0 --dport 3389 -j ACCEPT
+
+# Rule 10: Allow MySQL from anywhere (OVERLY PERMISSIVE + PROHIBITED in banking)
+-A INPUT -p tcp -s 0.0.0.0/0 --dport 3306 -j ACCEPT
+
+# Rule 11: Catch-all deny (should be last)
+-A INPUT -j DROP
+
+# Rule 12: This rule will never be reached (UNUSED - after catch-all)
+-A INPUT -p tcp -s 192.168.1.0/24 --dport 8080 -j ACCEPT
+
+# Rule 13: Conflicting rule - allow from specific IP but earlier deny all
+# (This demonstrates conflict detection)
+-A INPUT -p tcp -s 10.0.50.0/24 --dport 22 -j ACCEPT
+
+# Rule 14: Allow all traffic (SUSPICIOUS - catch-all accept)
+-A INPUT -j ACCEPT
+
+# Rule 15: Log everything without filter (SUSPICIOUS)
+-A INPUT -j LOG --log-prefix "IPTABLES: "

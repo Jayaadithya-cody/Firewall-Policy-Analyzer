@@ -1,0 +1,75 @@
+name: "Banking/Financial"
+policy_type: "banking"
+description: "Financial institution with maximum security requirements"
+default_deny_inbound: true
+default_deny_outbound: true
+allow_established: true
+allow_icmp: true
+prohibited_ports: [21, 23, 25, 53, 135, 139, 445, 1433, 3306, 3389, 5432, 5900, 5901, 8080]
+restricted_protocols: []
+banned_sources: ["0.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "169.254.0.0/16"]
+require_logging: true
+require_stateful: true
+max_rules_warning: 50
+zones:
+  - name: "Security Operations"
+    cidr: "10.20.0.0/24"
+    description: "SOC and security team"
+    zone_type: "admin"
+  - name: "Core Banking"
+    cidr: "10.20.10.0/24"
+    description: "Core banking systems"
+    zone_type: "restricted"
+  - name: "Database"
+    cidr: "10.20.20.0/24"
+    description: "Financial databases"
+    zone_type: "restricted"
+  - name: "Internal Apps"
+    cidr: "10.20.100.0/24"
+    description: "Internal applications"
+    zone_type: "internal"
+  - name: "DMZ"
+    cidr: "10.20.200.0/24"
+    description: "Public banking portal"
+    zone_type: "dmz"
+services:
+  - name: "SSH"
+    protocol: "tcp"
+    port: 22
+    allowed_sources: ["10.20.0.0/24"]
+    denied_sources: []
+    allowed_destinations: []
+    denied_destinations: []
+    requires_admin_access: true
+    admin_networks: ["10.20.0.0/24"]
+    description: "SOC jump host only"
+  - name: "HTTPS"
+    protocol: "tcp"
+    port: 443
+    allowed_sources: ["0.0.0.0/0"]
+    denied_sources: []
+    allowed_destinations: ["10.20.200.0/24"]
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "Customer portal only"
+  - name: "TLS-Admin"
+    protocol: "tcp"
+    port: 8443
+    allowed_sources: ["10.20.0.0/24"]
+    denied_sources: []
+    allowed_destinations: ["10.20.100.0/24"]
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "Admin console - SOC only"
+  - name: "Database"
+    protocol: "tcp"
+    port: 1521
+    allowed_sources: ["10.20.10.0/24"]
+    denied_sources: []
+    allowed_destinations: ["10.20.20.0/24"]
+    denied_destinations: []
+    requires_admin_access: false
+    admin_networks: []
+    description: "App to DB only"
